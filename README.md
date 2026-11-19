@@ -9,11 +9,12 @@ O projeto permite consultar equipamentos, validar grupos, identificar inconsist�
 ## ⚙️ Funcionalidades
 
 - **GET:** Consulta paginada de equipamentos e identificação dos grupos.
-- **PUT:** Atualização automática de grupos conforme regras de negócio.
-- **Validação:** Comparação entre grupo atual e grupo esperado.
+- **PUT (Grupos):** Atualização automática de grupos conforme regras de negócio.
+- **PUT (Patrimônio):** Associação automática do e-mail do colaborador ao campo `patrimonio`, utilizando hostname e dados de uma base JSON. Equipamentos especiais (`#1` a `#5`) recebem o próprio hostname como patrimônio.
+- **Validação:** Comparação entre os dados atuais e os valores esperados.
 - **Simulação:** Visualização das alterações antes da execução real.
 - **Auditoria:** Registro de atualizações e tratamento de inconsistências.
-- **Segurança:** Proteção de equipamentos com grupos não identificados.
+- **Segurança:** Proteção de equipamentos com dados não identificados ou inconsistentes.
 
 ## 🛠️ Tecnologias
 
@@ -29,7 +30,8 @@ milvus-inventory-automation/
 │   └── log.py
 ├── Services/
 │   ├── GET.py
-│   └── post.py
+│   ├── post.py
+│   └── put_patrimonio.py
 ├── Data/
 ├── tests/
 ├── main.py
@@ -47,6 +49,7 @@ milvus-inventory-automation/
 [1] Consultar inventário (GET)
 [2] Atualizar grupos (PUT)
 [3] Consultar histórico de atualizações
+[4] Atualizar patrimônio (PUT - E-mail)
 [0] Sair
 
 Selecione uma opção:
@@ -67,7 +70,7 @@ Arquivo: dados.json
 Status: Concluído com sucesso.
 ```
 
-### 3. Validação e atualização (PUT)
+### 3. Validação e atualização de grupos (PUT)
 
 ```text
 ===== RESULTADO PUT =====
@@ -83,9 +86,30 @@ Falhas: 0
 HOSTNAME: Grupo atual -> Grupo destino [PENDENTE]
 ```
 
-Os resultados são exemplos de execução em ambiente de teste. Nenhuma alteração é realizada no modo de simulação.
+### 4. Atualização de patrimônio (PUT)
 
-### 4. Exportação JSON
+A funcionalidade utiliza uma base JSON contendo **hostname, nome e e-mail dos colaboradores** para localizar os equipamentos no inventário e atualizar o campo `patrimonio` pela API do Milvus.
+
+Equipamentos identificados pelos prefixos `#1` a `#5` no apelido recebem o próprio hostname como patrimônio. Registros inconsistentes ou sem correspondência são separados para validação, e equipamentos definidos na lista de exclusões são ignorados.
+
+```text
+===== RESULTADO PUT PATRIMÔNIO =====
+
+Modo: SIMULAÇÃO
+Equipamentos analisados: 325
+Equipamentos especiais: 29
+Patrimônios já corretos: 28
+Precisam de atualização: 292
+Atualizações simuladas: 292
+Atualizações confirmadas: 0
+Ignorados: 5
+Pendências: 0
+Falhas: 0
+```
+
+Os resultados apresentados são exemplos de execução. Nenhuma alteração é realizada no modo de simulação.
+
+### 5. Exportação JSON
 
 Exemplo simplificado de equipamento consultado:
 
